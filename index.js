@@ -60,6 +60,7 @@ app.post('/test', (req, res)=>{
 
   CertCollection.findOne({name: name}, (err, respo)=>{
     if(!err){
+      // console.log(respo);
       if(!respo){
         console.log("The List does not exist");
         const userAdd = new CertCollection({
@@ -67,50 +68,49 @@ app.post('/test', (req, res)=>{
           course: con,
           email: email
         })
-        userAdd.save();
-        // res.redirect("/")
+        userAdd.save((err, result)=>{
+          const verify1 = `https://certverify.capacitybay.org/${result.course[0].id}`;
+          saveFile(qrFileLower, verify1);
+          setTimeout(saveCert, 2000, name, verify1, qrFileLower, course);
+        });
         
+        // for(let i = 0; i < respo.course.length; i++){
+        //   if(respo.course[i].courseTitle === course){
+        //     console.log(respo.course[i]);
+
+        //     // const verify = `https://certverify.capacitybay.org/${respo.course[i].id}`;
+        //     // saveFile(qrFileLower, verify);
+        //     // setTimeout(saveCert, 2000, name, verify, qrFileLower, course);
+        //   }
+        // }
+        // res.redirect("/")
       } else{
         console.log("The List Exists");
-        // respo.course.courseTitle.push(course);
-        // console.log(respo.course[0]._id);
-          for(let i = 0; i < respo.course.length; i++){
-          // console.log(respo.course[i].courseTitle);
-          
-          if(respo.course[i].courseTitle != course){
+        
+        const found = respo.course.some(el => el.courseTitle === course);
+          if (!found) {
             respo.course.push(con);
             respo.save();
-            
-          }else{
-            console.log("Course Exists");
+            for(let i = 0; i < respo.course.length; i++){
+              if(respo.course[i].courseTitle === course){
+                console.log();
+
+                const verify = `https://certverify.capacitybay.org/${respo.course[i].id}`;
+                saveFile(qrFileLower, verify);
+                setTimeout(saveCert, 2000, name, verify, qrFileLower, course);
+              }
+            }
           }
-          // console.log(rem);
-        }
+
       }
+      
       
     }else{
       console.log("There is an Error");
     }
   });
 
-
-  // CertCollection.findOneAndUpdate({name: name}, { $push: { course: "Hello"}}, (err, result)=>{
-  //   console.log(result);
-  //   // console.log(err);
-  // })
-
-  // CertCollection.findOne({name: name}, (err, resu)=>{
-  //   resu.course.push(course);
-  //   resu.save();
-  //   console.log(resu);
-  //   // const myId = resu.course._id;
-
-  // })
-  // userAdd.save()
-  const verify = `https://certverify.capacitybay.org/fRe24dshs`;
-
-  saveFile(qrFileLower, verify);
-  setTimeout(saveCert, 2000, name, verify, qrFileLower, course);
+  
   
 
 // Finalize the PDF and end the stream
