@@ -33,30 +33,16 @@ app.post('/test', (req, res)=>{
   const course = _.toUpper(req.body.course);
   const email = _.toLower(req.body.email);
 
-  const qrfileName = fname + lname;
+  const qrfileName = fname + lname + course;
   const qrFileLower = _.toLower(qrfileName);
   const name = fname + " " + lname;
+  const namePdf = fname + " " + lname + " " +course + " Certificate";
 
 
   const con = new Item({
     courseTitle: course
   })
-  // const userAdd = new CertCollection({
-  //   name: name,
-  //   email: email
-  // })
-  
-  // CertCollection.find({name: name}, (err, result)=>{
-  //   if(result.length === 0){
-  //     userAdd.save();
-  //     //Append Here
-  //     console.log("Added");
-  //   }else{
-      
-  //     console.log('User Exists');
-  //   }
-  // });
-
+ 
 
   CertCollection.findOne({name: name}, (err, respo)=>{
     if(!err){
@@ -71,18 +57,10 @@ app.post('/test', (req, res)=>{
         userAdd.save((err, result)=>{
           const verify1 = `https://certverify.capacitybay.org/${result.course[0].id}`;
           saveFile(qrFileLower, verify1);
-          setTimeout(saveCert, 2000, name, verify1, qrFileLower, course);
+          setTimeout(saveCert, 2000, name, verify1, qrFileLower, course, namePdf);
         });
         
-        // for(let i = 0; i < respo.course.length; i++){
-        //   if(respo.course[i].courseTitle === course){
-        //     console.log(respo.course[i]);
-
-        //     // const verify = `https://certverify.capacitybay.org/${respo.course[i].id}`;
-        //     // saveFile(qrFileLower, verify);
-        //     // setTimeout(saveCert, 2000, name, verify, qrFileLower, course);
-        //   }
-        // }
+  
         // res.redirect("/")
       } else{
         console.log("The List Exists");
@@ -93,11 +71,10 @@ app.post('/test', (req, res)=>{
             respo.save();
             for(let i = 0; i < respo.course.length; i++){
               if(respo.course[i].courseTitle === course){
-                console.log();
 
                 const verify = `https://certverify.capacitybay.org/${respo.course[i].id}`;
                 saveFile(qrFileLower, verify);
-                setTimeout(saveCert, 2000, name, verify, qrFileLower, course);
+                setTimeout(saveCert, 2000, name, verify, qrFileLower, course, namePdf);
               }
             }
           }
@@ -109,9 +86,6 @@ app.post('/test', (req, res)=>{
       console.log("There is an Error");
     }
   });
-
-  
-  
 
 // Finalize the PDF and end the stream
 // async function main(){
@@ -128,12 +102,11 @@ res.redirect("/");
 
 //Save Certificate 
 
-function saveCert(name, verify, qrFileLower, course){
-  doc.pipe(fs.createWriteStream(`${name}.pdf`));
+function saveCert(name, verify, qrFileLower, course, namePdf){
+  doc.pipe(fs.createWriteStream(`${namePdf}.pdf`));
 
   // Draw the certificate image
-  doc.image("public/cert3.jpg", 0, 0, { width: 842 });
-  
+  doc.image("public/img/cert3.jpg", 0, 0, { width: 842 });
   
   
   //Remember to download the font
@@ -162,7 +135,6 @@ function saveCert(name, verify, qrFileLower, course){
   
   doc.fontSize(12).text(verify, 20, 505, {
       align: "center",
-      // destination: 'ENDP',
       link: verify
   });
   doc.end();
@@ -172,7 +144,6 @@ function saveCert(name, verify, qrFileLower, course){
 
 
 //Generate QRcode and save
-
 function saveFile(qrFileLower, url){
     QRCode.toFile(`qr/${qrFileLower}.png`,url, function (err) {
       if(err){
@@ -190,6 +161,7 @@ function qw(qrFileLower){
     doc.image(`qr/${qrFileLower}.png`, 30, 450, {fit: [100, 100], align: "left"})
    .rect(320, 15, 100, 100)
 }
+
 
 
 //Home Get Route

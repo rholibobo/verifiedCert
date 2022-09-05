@@ -8,7 +8,8 @@ const coursesSchema = new mongoose.Schema({
 const customList = new mongoose.Schema({
   name: String,
   course: [coursesSchema],
-  email: String
+  email: String,
+  date: String
 })
 
 exports.Item = mongoose.model('item', coursesSchema);
