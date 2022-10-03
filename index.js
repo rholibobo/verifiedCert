@@ -5,7 +5,7 @@ const _ = require("lodash");
 const pdfDoc = require("pdfkit");
 const mongoose = require("mongoose");
 const QRCode = require('qrcode');
-const base64ToImage = require('base64-to-image');
+// const base64ToImage = require('base64-to-image');
 const { resolve } = require("path");
 const itemModel = require(`${__dirname}/schema.js`);
 
